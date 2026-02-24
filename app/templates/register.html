@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width: 600px;">
+
+    <div class="card shadow p-4">
+
+        <h3 class="text-center mb-4">
+            📝 {{ _('Register New User') }}
+        </h3>
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <input type="text"
+                       name="username"
+                       class="form-control"
+                       placeholder="{{ _('Username') }}"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       placeholder="{{ _('Email') }}"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="{{ _('Password') }}"
+                       required>
+            </div>
+
+            <!-- UPDATED ROLE SYSTEM -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">
+                    {{ _('Select Role') }}
+                </label>
+
+                <select name="role" class="form-select">
+
+                    <!-- Core Roles -->
+                    <option value="Admin">🔴 Administrator</option>
+                    <option value="Data Analyst">🟡 Data Analyst</option>
+                    <option value="Officer">🔵 Agriculture Officer</option>
+
+                    <!-- Additional Government Roles -->
+                    <option value="Field Officer">🟢 Field Officer</option>
+                    <option value="Researcher">📊 Research Analyst</option>
+                    <option value="Supply Manager">📦 Supply Manager</option>
+                    <option value="Farmer">🌾 Farmer</option>
+                    <option value="Viewer">👁️ Viewer (Read Only)</option>
+
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+                {{ _('Register') }}
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.login') }}">
+                {{ _('Already have an account? Login') }}
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

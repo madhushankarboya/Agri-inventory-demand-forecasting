@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow-lg p-4">
+
+        <h2 class="text-center mb-4 text-success">
+            📦 Government Inventory Optimization
+        </h2>
+
+        <!-- ================= FORM ================= -->
+        <form method="POST">
+
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select State</label>
+                    <select name="state" class="form-select" required>
+                        {% for state in states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Crop</label>
+                    <select name="crop" class="form-select" required>
+                        {% for crop in crops %}
+                        <option value="{{ crop }}">{{ crop }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-5">
+                    🔍 Calculate Inventory
+                </button>
+            </div>
+
+        </form>
+
+        <!-- ================= RESULTS ================= -->
+        {% if safety is not none %}
+
+        <hr>
+
+        <div class="row text-center mt-4">
+
+            <!-- Safety -->
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white p-3 shadow">
+                    <h6>Safety Stock</h6>
+                    <h3>{{ safety }}</h3>
+                </div>
+            </div>
+
+            <!-- Reorder -->
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white p-3 shadow">
+                    <h6>Reorder Point</h6>
+                    <h3>{{ reorder }}</h3>
+                </div>
+            </div>
+
+            <!-- EOQ -->
+            <div class="col-md-3 mb-3">
+                <div class="card bg-dark text-white p-3 shadow">
+                    <h6>EOQ</h6>
+                    <h3>{{ eoq }}</h3>
+                </div>
+            </div>
+
+            <!-- Risk Level -->
+            <div class="col-md-3 mb-3">
+                <div class="card p-3 shadow
+                    {% if risk_level == 'LOW' %}
+                        bg-success text-white
+                    {% elif risk_level == 'MEDIUM' %}
+                        bg-warning text-dark
+                    {% elif risk_level == 'HIGH' %}
+                        bg-danger text-white
+                    {% else %}
+                        bg-secondary text-white
+                    {% endif %}
+                ">
+                    <h6>Risk Level</h6>
+                    <h3>{{ risk_level }}</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= PDF DOWNLOAD ================= -->
+        <div class="text-center mt-4">
+
+            <form method="POST" action="{{ url_for('inventory.download_report') }}">
+
+                <input type="hidden" name="state" value="{{ request.form.state }}">
+                <input type="hidden" name="crop" value="{{ request.form.crop }}">
+                <input type="hidden" name="safety" value="{{ safety }}">
+                <input type="hidden" name="reorder" value="{{ reorder }}">
+                <input type="hidden" name="eoq" value="{{ eoq }}">
+                <input type="hidden" name="risk_level" value="{{ risk_level }}">
+
+                <button type="submit" class="btn btn-danger btn-lg px-5">
+                    ⬇ Download Official Government PDF
+                </button>
+
+            </form>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

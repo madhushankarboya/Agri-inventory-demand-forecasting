@@ -1,0 +1,145 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from .models import User, db
+
+auth = Blueprint("auth", __name__)
+
+
+# ================= LOGIN =================
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = User.query.filter_by(username=username).first()
+
+        if user:
+
+            # Check password
+            if check_password_hash(user.password, password):
+
+                # Check approval BEFORE login
+                if hasattr(user, "approved") and not user.approved:
+                    flash("Your account is waiting for Admin approval.")
+                    return redirect(url_for("auth.login"))
+
+                login_user(user)
+                return redirect(url_for("dashboard.show_dashboard"))
+
+            else:
+                flash("Incorrect password")
+
+        else:
+            flash("User not found")
+
+    return render_template("login.html")
+
+
+# ================= REGISTER =================
+@auth.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        role = request.form.get("role")
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash("Username already exists")
+            return redirect(url_for("auth.register"))
+
+        hashed_password = generate_password_hash(password)
+
+        # Approval Logic
+        if role == "Admin":
+            approved = True
+        else:
+            approved = False
+
+        new_user = User(
+            username=username,
+            email=email,
+            password=hashed_password,
+            role=role,
+            approved=approved
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Registration successful. Please login.")
+        return redirect(url_for("auth.login"))
+
+    return render_template("register.html")
+
+
+# ================= LOGOUT =================
+@auth.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("auth.login"))
+
+
+# ================= APPROVE USERS PAGE =================
+@auth.route("/approve_users")
+@login_required
+def approve_users():
+
+    if current_user.role != "Admin":
+        flash("Access denied.")
+        return redirect(url_for("dashboard.show_dashboard"))
+
+    pending_users = User.query.filter_by(approved=False).all()
+
+    return render_template("approve_users.html", users=pending_users)
+
+
+# ================= APPROVE SINGLE USER =================
+@auth.route("/approve_user/<int:user_id>")
+@login_required
+def approve_user(user_id):
+
+    if current_user.role != "Admin":
+        flash("Access denied.")
+        return redirect(url_for("dashboard.show_dashboard"))
+
+    user = User.query.get_or_404(user_id)
+
+    user.approved = True
+    db.session.commit()
+
+    flash(f"{user.username} has been approved.")
+    return redirect(url_for("auth.approve_users"))
+
+
+# ================= CHANGE USER ROLE =================
+@auth.route("/change_role/<int:user_id>", methods=["POST"])
+@login_required
+def change_role(user_id):
+
+    if current_user.role != "Admin":
+        flash("Access denied.")
+        return redirect(url_for("dashboard.show_dashboard"))
+
+    user = User.query.get_or_404(user_id)
+
+    new_role = request.form.get("role")
+
+    # Optional safety: prevent admin from changing own role
+    if user.id == current_user.id:
+        flash("You cannot change your own role.")
+        return redirect(url_for("auth.approve_users"))
+
+    user.role = new_role
+    db.session.commit()
+
+    flash(f"{user.username}'s role updated to {new_role}.")
+    return redirect(url_for("auth.approve_users"))

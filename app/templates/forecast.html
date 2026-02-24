@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">
+        📈 {{ _('AI Demand Forecast - 20 Years') }}
+    </h2>
+
+    {% if error %}
+        <div class="alert alert-danger text-center">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label">{{ _('State') }}</label>
+                <select name="state" class="form-select" required>
+                    {% for state in states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">{{ _('Crop') }}</label>
+                <select name="crop" class="form-select" required>
+                    {% for crop in crops %}
+                        <option value="{{ crop }}">{{ crop }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">
+                    {{ _('Rainfall Change (%)') }}
+                </label>
+                <input type="number" name="rainfall" class="form-control" value="0">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">
+                    {{ _('Temperature Change (°C)') }}
+                </label>
+                <input type="number" name="temperature" class="form-control" value="0">
+            </div>
+
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger btn-lg">
+                {{ _('Generate Forecast') }}
+            </button>
+        </div>
+
+    </form>
+
+    <hr>
+
+    {% if plot_html %}
+        <h4 class="mt-4 text-center">
+            {{ _('Forecast Graph') }}
+        </h4>
+
+        <div class="card shadow p-3">
+            {{ plot_html | safe }}
+        </div>
+    {% endif %}
+    {% if model_names %}
+<hr>
+
+<h4 class="text-center mt-4">🤖 Model Comparison</h4>
+
+<div class="card shadow p-3">
+
+<table class="table table-bordered text-center">
+    <thead>
+        <tr>
+            <th>Model</th>
+            <th>MAE</th>
+            <th>R² Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in range(model_names|length) %}
+        <tr>
+            <td>{{ model_names[i] }}</td>
+            <td>{{ mae_scores[i] | round(2) }}</td>
+            <td>{{ r2_scores[i] | round(2) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<img src="{{ url_for('static', filename='accuracy_chart.png') }}"
+     class="img-fluid mt-3 shadow">
+
+</div>
+{% endif %}
+
+    {% if adjusted %}
+        <h4 class="mt-4 text-center">
+            {{ _('Climate Adjusted Forecast - Next 20 Years') }}
+        </h4>
+
+        <div class="card shadow p-3">
+            <ul class="list-group list-group-flush">
+                {% for value in adjusted %}
+                    <li class="list-group-item">
+                        {{ value | round(2) }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

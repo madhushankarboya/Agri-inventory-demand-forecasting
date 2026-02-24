@@ -1,0 +1,14 @@
+flask
+flask_sqlalchemy
+flask_login
+flask_bcrypt
+pandas
+numpy
+scikit-learn
+tensorflow
+plotly
+reportlab
+gunicorn
+Flask-Babel
+Matplotlib
+XGBoost

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="text-center mb-4">
+    National Agricultural Dashboard
+</h2>
+
+<!-- ================= KPI SECTION ================= -->
+<div class="row text-center mb-4">
+
+    <!-- Total States -->
+    <div class="col-md-3">
+        <div class="card shadow p-4 bg-success text-white">
+            <h6>Total States</h6>
+            <h2 id="statesCounter">{{ total_states or 0 }}</h2>
+        </div>
+    </div>
+
+    <!-- Total Production -->
+    <div class="col-md-3">
+        <div class="card shadow p-4 bg-primary text-white">
+            <h6>Total Production</h6>
+            <h2 id="productionCounter">{{ total_production or 0 }}</h2>
+        </div>
+    </div>
+
+    <!-- Growth Percentage -->
+    <div class="col-md-3">
+        <div class="card shadow p-4 bg-warning text-dark">
+            <h6>Growth %</h6>
+            <h2>{{ growth_percent or 0 }}%</h2>
+        </div>
+    </div>
+
+    <!-- Risk Overview -->
+    <div class="col-md-3">
+        <div class="card shadow p-4
+            {% if risk_overview == 'LOW' %}
+                bg-success text-white
+            {% elif risk_overview == 'MEDIUM' %}
+                bg-warning text-dark
+            {% elif risk_overview == 'HIGH' %}
+                bg-danger text-white
+            {% else %}
+                bg-secondary text-white
+            {% endif %}
+        ">
+            <h6>Risk Overview</h6>
+            <h2>{{ risk_overview or 'N/A' }}</h2>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ================= ROLE-BASED DISPLAY ================= -->
+
+{% if current_user.role in ["Admin", "Data Analyst"] %}
+
+    <!-- Production Trend -->
+    <div class="card shadow p-4 mb-4">
+        <h5 class="text-center">Production Trend</h5>
+        <canvas id="trendChart"></canvas>
+    </div>
+
+    <!-- Crop Comparison -->
+    <div class="card shadow p-4 mb-4">
+        <h5 class="text-center">Crop Comparison</h5>
+        <canvas id="cropChart"></canvas>
+    </div>
+
+{% endif %}
+
+{% if current_user.role in ["Admin", "Officer"] %}
+    <!-- Risk Section visible to Admin & Officer -->
+{% endif %}
+
+{% if current_user.role == "Farmer" %}
+    <!-- Farmer sees only summary -->
+{% endif %}
+
+
+<!-- ================= FORECAST SNAPSHOT ================= -->
+<div class="card shadow p-4 mb-4 bg-info text-white text-center">
+    <h5>Next Year Forecast</h5>
+    <h2>{{ forecast_next or 0 }}</h2>
+</div>
+
+<hr>
+
+<!-- ================= AGRIBOT ================= -->
+<h4>AgriBot Assistant</h4>
+
+<div class="card p-3">
+    <select id="modeSelect" class="form-select mb-2">
+        <option value="admin">Admin Mode</option>
+        <option value="farmer">Farmer Mode</option>
+    </select>
+
+    <input type="text" id="user-input" class="form-control mb-2" placeholder="Ask something...">
+    <button class="btn btn-success" onclick="sendMessage()">Send</button>
+
+    <div id="chat-response" class="mt-3 text-success"></div>
+</div>
+
+
+<!-- ================= SAFE JSON DATA ================= -->
+<script id="dashboard-data" type="application/json">
+{
+    "trend_labels": {{ trend_labels | default([]) | tojson }},
+    "trend_values": {{ trend_values | default([]) | tojson }},
+    "crops": {{ crops | default([]) | tojson }},
+    "crop_values": {{ crop_values | default([]) | tojson }},
+    "total_states": {{ total_states | default(0) }},
+    "total_production": {{ total_production | default(0) }}
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// ================= READ SAFE DATA =================
+const dashboardData = JSON.parse(
+    document.getElementById("dashboard-data").textContent
+);
+
+const trendLabels = dashboardData.trend_labels || [];
+const trendValues = dashboardData.trend_values || [];
+const cropLabels = dashboardData.crops || [];
+const cropValues = dashboardData.crop_values || [];
+
+// ================= TREND CHART =================
+if (trendLabels.length > 0 && document.getElementById('trendChart')) {
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: [{
+                label: 'Total Production',
+                data: trendValues,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13,110,253,0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        }
+    });
+}
+
+// ================= CROP CHART =================
+if (cropLabels.length > 0 && document.getElementById('cropChart')) {
+    new Chart(document.getElementById('cropChart'), {
+        type: 'bar',
+        data: {
+            labels: cropLabels,
+            datasets: [{
+                label: 'Production',
+                data: cropValues,
+                backgroundColor: '#198754'
+            }]
+        }
+    });
+}
+
+// ================= ANIMATED COUNTERS =================
+function animateCounter(id, target) {
+    let count = 0;
+    let increment = target / 100;
+    let interval = setInterval(() => {
+        count += increment;
+        if (count >= target) {
+            count = target;
+            clearInterval(interval);
+        }
+        if (document.getElementById(id)) {
+            document.getElementById(id).innerText = Math.floor(count);
+        }
+    }, 20);
+}
+
+animateCounter("statesCounter", dashboardData.total_states);
+animateCounter("productionCounter", dashboardData.total_production);
+
+// ================= CHATBOT =================
+function sendMessage() {
+
+    let message = document.getElementById("user-input").value;
+
+    fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            message: message,
+            mode: document.getElementById("modeSelect").value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("chat-response").innerText = data.reply;
+    });
+}
+
+</script>
+
+{% endblock %}

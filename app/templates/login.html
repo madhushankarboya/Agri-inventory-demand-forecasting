@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5" style="max-width: 500px;">
+
+    <div class="card shadow p-4">
+
+        <h3 class="text-center mb-4">
+            🔐 {{ _('Government Secure Login') }}
+        </h3>
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <input type="text"
+                       name="username"
+                       class="form-control"
+                       placeholder="{{ _('Username') }}"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="{{ _('Password') }}"
+                       required>
+            </div>
+
+            <button class="btn btn-danger w-100">
+                {{ _('Login') }}
+            </button>
+
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.register') }}">
+                {{ _('New user? Register here') }}
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
