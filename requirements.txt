@@ -20,7 +20,7 @@ gast
 google-pasta
 greenlet
 grpcio
-gunicorn==21.2.0
+gunicorn
 h5py
 idna
 itsdangerous
