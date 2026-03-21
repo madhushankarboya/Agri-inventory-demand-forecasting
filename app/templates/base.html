@@ -6,17 +6,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- ✅ Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Your CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body class="{{ current_user.role|lower|replace(' ', '-') }}-theme">
+
+<!-- ✅ NAVBAR (FIXED RESPONSIVE) -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
 
+    <!-- Logo -->
     <a class="navbar-brand fw-bold">🇮🇳 {{ _('National Agri AI Portal') }}</a>
 
-    <div class="collapse navbar-collapse">
+    <!-- ✅ Hamburger Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- ✅ Menu -->
+    <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
 
         <li class="nav-item">
@@ -39,69 +51,62 @@
 
         <!-- 🌐 Language Dropdown -->
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                 🌐 {{ _('Language') }}
             </a>
             <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('set_language', lang='en') }}">
-                        English
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('set_language', lang='hi') }}">
-                        हिंदी
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('set_language', lang='te') }}">
-                        తెలుగు
-                    </a>
-                </li>
+                <li><a class="dropdown-item" href="{{ url_for('set_language', lang='en') }}">English</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('set_language', lang='hi') }}">हिंदी</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('set_language', lang='te') }}">తెలుగు</a></li>
             </ul>
         </li>
-        {% if current_user.is_authenticated and current_user.role == "Admin" %}
-<li class="nav-item">
-    <a class="nav-link position-relative" href="{{ url_for('auth.approve_users') }}">
-        🔒 Approve Users
 
-        {% if pending_count > 0 %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            {{ pending_count }}
-        </span>
+        {% if current_user.is_authenticated and current_user.role == "Admin" %}
+        <li class="nav-item">
+            <a class="nav-link position-relative" href="{{ url_for('auth.approve_users') }}">
+                🔒 Approve Users
+
+                {% if pending_count > 0 %}
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ pending_count }}
+                </span>
+                {% endif %}
+            </a>
+        </li>
         {% endif %}
 
-    </a>
-</li>
-{% endif %}
-
         {% if current_user.is_authenticated %}
-            <li class="nav-item">
-                <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
-                    {{ _('Logout') }}
-                </a>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
+                {{ _('Logout') }}
+            </a>
+        </li>
         {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('auth.login') }}">
-                    {{ _('Login') }}
-                </a>
-            </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                {{ _('Login') }}
+            </a>
+        </li>
         {% endif %}
 
       </ul>
     </div>
+
   </div>
 </nav>
 
+<!-- CONTENT -->
 <div class="container mt-4">
     {% block content %}{% endblock %}
 </div>
 
+<!-- FOOTER -->
 <footer class="text-center mt-4 p-3 bg-light">
     © 2026 {{ _('Government of India') }}
 </footer>
 
+<!-- ✅ Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
