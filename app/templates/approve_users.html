@@ -41,10 +41,17 @@
 
                             <select name="role" class="form-select form-select-sm me-2">
 
-                                <option value="Farmer">Farmer</option>
-                                <option value="Officer">Officer</option>
-                                <option value="Data Analyst">Data Analyst</option>
-                                <option value="Admin">Admin</option>
+
+                                  <option value="Farmer">Farmer</option>
+                                  <option value="Officer">Officer</option>
+                                  <option value="Data Analyst">Data Analyst</option>
+                                  <option value="Admin">Admin</option>
+
+                                <!-- 🔐 Only Super Admin can see this -->
+                                  {% if current_user.role == "Super Admin" %}
+                                   <option value="Super Admin">Super Admin</option>
+                                     {% endif %}
+
 
                             </select>
 
