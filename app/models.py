@@ -9,7 +9,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(100), unique=True)
     email = db.Column(db.String(120))
     password = db.Column(db.String(200))
-    role = db.Column(db.String(50))  # Admin / Officer / Data Analyst / Public
+ role = db.Column(db.String(50), default="Farmer")  # Admin / Officer / Data Analyst / Public
     approved = db.Column(db.Boolean, default=False)
     deault_role = "Public User"
     def set_password(self, password):
