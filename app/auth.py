@@ -177,3 +177,10 @@ def change_role(user_id):
     # ❌ Others blocked
     flash("Access denied.")
     return redirect(url_for("dashboard.show_dashboard"))
+@auth.route("/logs")
+@login_required
+@admin_required
+def view_logs():
+
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+    return render_template("logs.html", logs=logs)
