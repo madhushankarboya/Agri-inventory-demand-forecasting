@@ -1,17 +1,40 @@
-from flask import Flask, session, redirect, request
+from flask import Flask, session, redirect, request, abort
 from flask_login import LoginManager, current_user
 from flask_bcrypt import Bcrypt
+from functools import wraps
+
 from config import Config
-from .models import db
-from .translations import translate   # 👈 import translator
+from .models import db, User
+from .translations import translate
 
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 
 
+# ============================
+# 🔐 ADMIN DECORATOR (GLOBAL)
+# ============================
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != "Admin":
+            abort(403)  # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # ============================
+    # 🔐 SESSION SECURITY
+    # ============================
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SECURE=False,  # 🔴 Change to True in HTTPS (Render)
+        SESSION_COOKIE_SAMESITE='Lax'
+    )
 
     # ============================
     # Initialize Extensions
@@ -23,24 +46,34 @@ def create_app():
     login_manager.login_view = "auth.login"
 
     # ============================
-    # Prevent Cache (important)
+    # 🔐 UNAUTHORIZED HANDLER
+    # ============================
+    @login_manager.unauthorized_handler
+    def unauthorized_callback():
+        return redirect("/login")
+
+    # ============================
+    # 🔐 PREVENT CACHE (STRONG)
     # ============================
     @app.after_request
     def add_header(response):
-        response.headers["Cache-Control"] = "no-store"
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
         return response
 
     # ============================
-    # Language Route
+    # 🌐 LANGUAGE ROUTE (SAFE)
     # ============================
     @app.route("/set_language/<lang>")
     def set_language(lang):
-        if lang in ["en", "hi", "te"]:
-            session["lang"] = lang
+        if lang not in ["en", "hi", "te"]:
+            return redirect("/")
+        session["lang"] = lang
         return redirect(request.referrer or "/")
 
     # ============================
-    # Inject Translator into Templates
+    # 🌐 TRANSLATOR INJECTION
     # ============================
     @app.context_processor
     def inject_translator():
@@ -50,10 +83,8 @@ def create_app():
         return dict(_=_)
 
     # ============================
-    # Inject Pending Users Count (ADMIN ONLY)
+    # 🔐 ADMIN PENDING COUNT
     # ============================
-    from .models import User
-
     @app.context_processor
     def inject_pending_count():
         if current_user.is_authenticated and current_user.role == "Admin":
@@ -63,7 +94,7 @@ def create_app():
         return dict(pending_count=pending)
 
     # ============================
-    # User Loader
+    # 🔐 USER LOADER
     # ============================
     @login_manager.user_loader
     def load_user(user_id):
