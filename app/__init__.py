@@ -1,6 +1,6 @@
-from flask import Flask, session, redirect, request, abort
-from flask_login import LoginManager, current_user
-from flask_bcrypt import Bcrypt
+from flask import Flask, session, redirect, request, abort # type: ignore
+from flask_login import LoginManager, current_user # type: ignore
+from flask_bcrypt import Bcrypt # type: ignore
 from functools import wraps
 
 from config import Config

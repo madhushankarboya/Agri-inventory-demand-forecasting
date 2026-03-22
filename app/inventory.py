@@ -1,23 +1,23 @@
-from flask import Blueprint, render_template, request, send_file, current_app, abort
-from flask_login import login_required
+from flask import Blueprint, render_template, request, send_file, current_app, abort # type: ignore
+from flask_login import login_required # type: ignore
 from app.utils import role_required, calculate_inventory
 
-import pandas as pd
-import numpy as np
+import pandas as pd # type: ignore
+import numpy as np # type: ignore
 import os
 import uuid
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # type: ignore
 
-from reportlab.platypus import (
+from reportlab.platypus import ( # type: ignore
     SimpleDocTemplate, Paragraph, Spacer,
     Table, TableStyle, Image
 )
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import A4
-from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.barcode import qr
+from reportlab.lib import colors # type: ignore
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle # type: ignore
+from reportlab.lib.units import inch # type: ignore
+from reportlab.lib.pagesizes import A4 # type: ignore
+from reportlab.graphics.shapes import Drawing # type: ignore
+from reportlab.graphics.barcode import qr # type: ignore
 
 inventory = Blueprint("inventory", __name__)
 

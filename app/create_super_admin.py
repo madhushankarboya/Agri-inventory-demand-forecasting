@@ -1,6 +1,6 @@
 from app import create_app
 from app.models import db, User
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash # type: ignore
 
 app = create_app()
 

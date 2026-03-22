@@ -1,8 +1,12 @@
+import dbm
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from .models import AuditLog
+
+from app import admin_required
+from .models import AuditLog, User
 
 auth = Blueprint("auth", __name__)
 
@@ -75,8 +79,8 @@ def register():
             approved=False   # always require approval
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        dbm.session.add(new_user) 
+        dbm.session.commit() 
 
         flash("Registration successful. Waiting for Admin approval.")
         return redirect(url_for("auth.login"))
@@ -111,7 +115,7 @@ def approve_user(user_id):
     user = User.query.get_or_404(user_id)
 
     user.approved = True
-    db.session.commit()
+    dbm.session.commit()
 
     # ✅ LOG ENTRY
     log = AuditLog(
@@ -119,8 +123,8 @@ def approve_user(user_id):
         performed_by=current_user.username,
         target_user=user.username
     )
-    db.session.add(log)
-    db.session.commit()
+    dbm.session.add(log)
+    dbm.session.commit()
 
     flash(f"{user.username} approved.")
     return redirect(url_for("auth.approve_users"))
@@ -140,7 +144,7 @@ def change_role(user_id):
     # 🔐 SUPER ADMIN (full access)
     if current_user.role == "Super Admin":
         user.role = new_role
-        db.session.commit()
+        dbm.session.commit()
         flash("Role updated by Super Admin.")
         return redirect(url_for("auth.approve_users"))
 
@@ -161,18 +165,18 @@ def change_role(user_id):
                 return redirect(url_for("auth.approve_users"))
 
         user.role = new_role
-        db.session.commit()
+        dbm.session.commit()
         # After db.session.commit()
 
-      log = AuditLog(
+    log = AuditLog(
         action=f"Changed role to {new_role}",
         performed_by=current_user.username,
-       target_user=user.username
-      )
-   db.session.add(log)
-  db.session.commit()
-        flash("Role updated successfully.")
-        return redirect(url_for("auth.approve_users"))
+        target_user=user.username
+        )
+    dbm.session.add(log)
+    dbm.session.commit()
+    flash("Role updated successfully.")
+    return redirect(url_for("auth.approve_users"))
 
     # ❌ Others blocked
     flash("Access denied.")

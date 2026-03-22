@@ -1,10 +1,10 @@
 import os
 from datetime import datetime
-import numpy as np
+import numpy as np # type: ignore
 import math
-from flask_login import current_user
+from flask_login import current_user # type: ignore
 from functools import wraps
-from flask import abort
+from flask import abort # type: ignore
 
 LOG_FILE = "instance/activity.log"
 

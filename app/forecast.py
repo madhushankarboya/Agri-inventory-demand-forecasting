@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, current_app
-from flask_login import login_required
-import pandas as pd
-import plotly.express as px
-import numpy as np
+from flask import Blueprint, render_template, request, current_app # type: ignore
+from flask_login import login_required # type: ignore
+import pandas as pd # type: ignore
+import plotly.express as px # type: ignore
+import numpy as np # type: ignore
 import os
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt # type: ignore
 
 from app.utils import role_required
 from app.ml_models import random_forest_model, xgboost_model, lstm_model

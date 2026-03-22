@@ -1,10 +1,10 @@
-import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, r2_score
-from xgboost import XGBRegressor
-from sklearn.preprocessing import MinMaxScaler
-from keras.models import Sequential
-from keras.layers import LSTM, Dense
+import numpy as np # type: ignore
+from sklearn.ensemble import RandomForestRegressor # type: ignore
+from sklearn.metrics import mean_absolute_error, r2_score # type: ignore
+from xgboost import XGBRegressor # type: ignore
+from sklearn.preprocessing import MinMaxScaler # type: ignore
+from keras.models import Sequential # type: ignore
+from keras.layers import LSTM, Dense # type: ignore
 
 
 # ================= RANDOM FOREST =================

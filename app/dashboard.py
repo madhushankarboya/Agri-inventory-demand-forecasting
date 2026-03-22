@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify, current_app
-from flask_login import login_required
-import pandas as pd
+from flask import Blueprint, render_template, session, redirect, url_for, request, jsonify, current_app # type: ignore
+from flask_login import login_required # type: ignore
+import pandas as pd # type: ignore
 import os
-import numpy as np
+import numpy as np # type: ignore
 
 dashboard = Blueprint("dashboard", __name__)
 
