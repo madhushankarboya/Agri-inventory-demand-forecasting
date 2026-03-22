@@ -162,6 +162,15 @@ def change_role(user_id):
 
         user.role = new_role
         db.session.commit()
+        # After db.session.commit()
+
+      log = AuditLog(
+        action=f"Changed role to {new_role}",
+        performed_by=current_user.username,
+       target_user=user.username
+      )
+   db.session.add(log)
+  db.session.commit()
         flash("Role updated successfully.")
         return redirect(url_for("auth.approve_users"))
 
