@@ -120,19 +120,44 @@ def approve_user(user_id):
 # ================= CHANGE ROLE =================
 @auth.route("/change_role/<int:user_id>", methods=["POST"])
 @login_required
-@admin_required
 def change_role(user_id):
 
     user = User.query.get_or_404(user_id)
     new_role = request.form.get("role")
 
-    # 🔐 Prevent self role change
+    # ❌ Prevent self role change
     if user.id == current_user.id:
         flash("You cannot change your own role.")
         return redirect(url_for("auth.approve_users"))
 
-    user.role = new_role
-    db.session.commit()
+    # 🔐 SUPER ADMIN (full access)
+    if current_user.role == "Super Admin":
+        user.role = new_role
+        db.session.commit()
+        flash("Role updated by Super Admin.")
+        return redirect(url_for("auth.approve_users"))
 
-    flash(f"{user.username}'s role updated to {new_role}.")
-    return redirect(url_for("auth.approve_users"))
+    # 🔐 NORMAL ADMIN (restricted)
+    if current_user.role == "Admin":
+
+        # ❌ Cannot assign Super Admin
+        if new_role == "Super Admin":
+            flash("Only Super Admin can assign this role.")
+            return redirect(url_for("auth.approve_users"))
+
+        # 🔐 Limit Admins to 3
+        if new_role == "Admin":
+            admin_count = User.query.filter_by(role="Admin", approved=True).count()
+
+            if user.role != "Admin" and admin_count >= 3:
+                flash("Maximum 3 admins allowed.")
+                return redirect(url_for("auth.approve_users"))
+
+        user.role = new_role
+        db.session.commit()
+        flash("Role updated successfully.")
+        return redirect(url_for("auth.approve_users"))
+
+    # ❌ Others blocked
+    flash("Access denied.")
+    return redirect(url_for("dashboard.show_dashboard"))
