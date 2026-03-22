@@ -75,20 +75,7 @@
         </li>
         {% endif %}
 
-        {% if current_user.is_authenticated %}
-        <li class="nav-item">
-            <a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">
-                {{ _('Logout') }}
-            </a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                {{ _('Login') }}
-            </a>
-        </li>
-        {% endif %}
-         {% if current_user.is_authenticated and current_user.role in ["Admin", "Super Admin"] %}
+      {% if current_user.is_authenticated and current_user.role in ["Admin", "Super Admin"] %}
 <li class="nav-item">
     <a class="nav-link" href="/logs">Logs</a>
 </li>
